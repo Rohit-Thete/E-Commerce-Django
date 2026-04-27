@@ -12,7 +12,7 @@ def register(request):
     serializer = RegisterSerializer(data = data)
     if serializer.is_valid():
         user = serializer.save()
-        return Response({"msg":"User Created","user":{user.username}},status=201)
+        return Response({"msg":"User Created","user":{"username":user.username,"email":user.email}},status=201)
     
     return Response(serializer.errors,status=400)
 
