@@ -1,5 +1,6 @@
-from .models import User
+from .models import User,Product,Category
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -92,5 +93,46 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        validators=[
+            UniqueValidator(
+                queryset=Category.objects.all(),
+                message="This Category already exists"
+            )
+        ]
+    )
+
+
+    class Meta:
+        model = Category
+        fields = "__all__"
+
+
+    # def validate_name(self,value):
+    #     category = self.instance
+    #     if category:
+          
+    #         exists = Category.objects.filter(name=value).exclude(id=category.id).exists()
+    #     else:
+            
+    #         exists = Category.objects.filter(name=value).exists()
+
+    #     if exists:
+    #         raise serializers.ValidationError("This Category already exists")
+
+    #     return value
+
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+    
 
         
