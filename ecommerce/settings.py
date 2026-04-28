@@ -125,3 +125,20 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     )
 }
+
+
+from datetime import timedelta
+
+# settings.py
+
+SIMPLE_JWT = {
+    # Increase Access Token lifetime (e.g., to 1 hour)
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
+    
+    # Increase Refresh Token lifetime (e.g., to 15 days)
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
+    
+    # Optional: Enable rotation to keep users logged in longer
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}

@@ -1,4 +1,4 @@
-from .views import register,login_user,UserView,CategoryView
+from .views import register,login_user,UserView,CategoryView,ProductView
 from django.urls import path
 
 urlpatterns = [
@@ -7,5 +7,7 @@ urlpatterns = [
     path('user/',UserView.as_view()),
     path('category/',CategoryView.as_view()),
     path('category/<int:pk>/',CategoryView.as_view()),
+    path('product/',ProductView.as_view()),
+    path('product/<int:pk>/',ProductView.as_view()),
 
 ]
