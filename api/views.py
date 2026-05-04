@@ -192,5 +192,13 @@ class OrderView(APIView):
         return Response(serializer.data,status=200)
     
 
+    def delete(self,request,pk):
+        user = request.user
+        order = get_object_or_404(Order,id=pk,user=user)
+        id = order.id
+        order.delete()
+
+        return Response({"msg":f"Order with id '{id}' deleted successfully"})
+
 
 

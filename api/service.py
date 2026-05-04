@@ -23,7 +23,7 @@ def create_order(user,items):
                 quantity = quantity,
                 price = price
             )
-            total = quantity * price
+            total += quantity * price
 
             order.total_bill = total
             order.save()
