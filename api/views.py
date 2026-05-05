@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import User, Category, Product
+from .models import User, Category, Product, Order
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -12,7 +12,10 @@ from .serializers import (
     CategorySerializer,
     ProductWriteSerializer,
     ProductReadSerializer,
+    OrderCreateSerializer,
+    OrderReadSerializer
 )
+from .service import create_order
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from .permissions import *
 
@@ -163,3 +166,39 @@ class ProductView(APIView):
         product.delete()
 
         return Response({"msg": f"Product '{name}' deleted succesfully"}, status=200)
+    
+
+
+class OrderView(APIView):
+    permission_classes=([IsAuthenticated])
+    def post(self,request):
+        serializer = OrderCreateSerializer(data=request.data)
+
+        if serializer.is_valid():
+            items = serializer.validated_data["items"]
+
+            order = create_order(request.user,items)
+
+            return Response({"msg":"order created","orderid":order.id},status=201)
+        
+        return Response(serializer.errors,status=400)
+    
+
+    def get(self,request):
+        user = request.user
+        orders = Order.objects.filter(user = user)
+        serializer = OrderReadSerializer(orders,many=True)
+
+        return Response(serializer.data,status=200)
+    
+
+    def delete(self,request,pk):
+        user = request.user
+        order = get_object_or_404(Order,id=pk,user=user)
+        id = order.id
+        order.delete()
+
+        return Response({"msg":f"Order with id '{id}' deleted successfully"})
+
+
+

@@ -1,4 +1,4 @@
-from .models import User, Product, Category
+from .models import User, Product, Category, Order, OrderItem
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
@@ -149,3 +149,39 @@ class ProductReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = "__all__"
+
+
+
+class OrderItemInputSerializer(serializers.Serializer):
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all()
+    )
+    quantity = serializers.IntegerField(min_value=1)
+
+
+class OrderCreateSerializer(serializers.Serializer):
+    items = OrderItemInputSerializer(many=True)
+
+class OrderItemReadSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+
+    class Meta:
+        model = OrderItem
+        fields = ["product", "product_name", "quantity", "price", "item_subtotal"]
+
+class OrderReadSerializer(serializers.ModelSerializer):
+    items = OrderItemReadSerializer(many= True,read_only = True)
+    class Meta:
+        model = Order
+        fields = ["id","total_bill","items","date_created"]
+        
+
+
+
+
+
+        
+
+
+        
+
