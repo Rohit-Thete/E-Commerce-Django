@@ -157,6 +157,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = "rohitthete.512@gmail.com"
-EMAIL_HOST_PASSWORD = "zvahhaerbptoexkv"
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 CELERY_BROKER_URL = "redis://localhost:6379/0"
