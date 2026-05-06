@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.db.models import Prefetch
 from .models import User, Category, Product, Order, OrderItem
 from rest_framework.views import APIView
+from .task import send_welcome_email, send_order_confirmation_email
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
@@ -19,6 +20,7 @@ from .serializers import (
 from .service import create_order
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from .permissions import *
+from django.db import transaction
 
 # Create your views here.
 
@@ -26,19 +28,21 @@ from .permissions import *
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def register(request):
-    data = request.data
-    serializer = RegisterSerializer(data=data)
-    if serializer.is_valid():
-        user = serializer.save()
-        return Response(
-            {
-                "msg": "User Created",
-                "user": {"username": user.username, "email": user.email},
-            },
-            status=201,
-        )
+    with transaction.atomic():
+        data = request.data
+        serializer = RegisterSerializer(data=data)
+        if serializer.is_valid():
+            user = serializer.save()
+            send_welcome_email.delay(user.username, user.email)
+            return Response(
+                {
+                    "msg": "User Created",
+                    "user": {"username": user.username, "email": user.email},
+                },
+                status=201,
+            )
 
-    return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=400)
 
 
 @api_view(["POST"])
@@ -173,14 +177,16 @@ class ProductView(APIView):
 class OrderView(APIView):
     permission_classes=([IsAuthenticated])
     def post(self,request):
+
         serializer = OrderCreateSerializer(data=request.data)
 
         if serializer.is_valid():
             items = serializer.validated_data["items"]
+            with transaction.atomic():
+                order = create_order(request.user,items)
+                send_order_confirmation_email.delay(request.user.username, request.user.email, order.id)
 
-            order = create_order(request.user,items)
-
-            return Response({"msg":"order created","orderid":order.id},status=201)
+                return Response({"msg":"order created","orderid":order.id},status=201)
         
         return Response(serializer.errors,status=400)
     
