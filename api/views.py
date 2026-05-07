@@ -197,6 +197,17 @@ class OrderView(APIView):
 
         return Response(serializer.data,status=200)
     
+    def put(self,request,pk):
+        user = request.user
+        order = get_object_or_404(Order,id=pk,user=user.id)
+        if order.status == OrderStatus.CANCELLED:
+            return Response({"error":"Invalid Request"},status=400)
+            
+        order.status = OrderStatus.CANCELLED
+        order.save(update_fields=["status"])
+
+        return Response({"msg":f"order with order id {order.id} Cancelled succesfully"})
+    
 
     # def delete(self,request,pk):
     #     user = request.user
@@ -207,18 +218,6 @@ class OrderView(APIView):
     #     return Response({"msg":f"Order with id '{id}' deleted successfully"})
     
 
-@api_view(["PUT"])
-@permission_classes([IsAuthenticated])
-def cancel(request,pk):
-    user = request.user
-    order = get_object_or_404(Order,id=pk,user=user.id)
-    if order.status == OrderStatus.CANCELLED:
-        return Response({"error":"Invalid Request"},status=400)
-        
-    order.status = OrderStatus.CANCELLED
-    order.save(update_fields=["status"])
-
-    return Response({"msg":f"order with order id {order.id} Cancelled succesfully"})
  
 
 
