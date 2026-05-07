@@ -65,12 +65,10 @@ def login_user(request):
 
 
 class UserView(APIView):
-    permission_classes = [IsOwner, IsAuthenticated]
-
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         user = request.user
         data = User.objects.get(username=user.username)
-
         serializer = UserReadSerializer(data)
         return Response(serializer.data, status=200)
 
