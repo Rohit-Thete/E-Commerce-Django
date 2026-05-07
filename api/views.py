@@ -33,7 +33,6 @@ def register(request):
         serializer = RegisterSerializer(data=data)
         if serializer.is_valid():
             user = serializer.save()
-            send_welcome_email.delay(user.username, user.email)
             return Response(
                 {
                     "msg": "User Created",
@@ -183,8 +182,7 @@ class OrderView(APIView):
             items = serializer.validated_data["items"]
             with transaction.atomic():
                 order = create_order(request.user,items)
-                send_order_confirmation_email.delay(request.user.username, request.user.email, order.id)
-
+                # send_order_confirmation_email.delay(request.user.username, request.user.email, order.id)
                 return Response({"msg":"order created","orderid":order.id},status=201)
         
         return Response(serializer.errors,status=400)
