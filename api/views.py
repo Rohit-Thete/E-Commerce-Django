@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.db.models import Prefetch
-from .models import User, Category, Product, Order, OrderItem
+from .models import User, Category, Product, Order, OrderItem, OrderStatus
 from rest_framework.views import APIView
 from .task import send_welcome_email, send_order_confirmation_email
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from .serializers import (
     RegisterSerializer,
     LoginSerializer,
@@ -206,6 +206,20 @@ class OrderView(APIView):
         order.delete()
 
         return Response({"msg":f"Order with id '{id}' deleted successfully"})
+    
+
+@api_view(["PUT"])
+def cancel(self,request,pk):
+    user = request.user
+    order = get_object_or_404(Order,id=pk,user=user)
+    if order.status == OrderStatus.CANCELLED:
+        return Response({"error":"Invalid Request"},status=400)
+        
+    order.status = OrderStatus.CANCELLED
+    order.save(update_fields=["status"])
+
+    return Response({"msg":f"order with order id {order.id} Cancelled succesfully"})
+ 
 
 
 
