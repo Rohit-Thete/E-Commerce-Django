@@ -6,6 +6,11 @@ class Role(models.TextChoices):
     ADMIN = 'admin', 'Admin'
     CUSTOMER = 'customer', 'Customer'
 
+class OrderStatus(models.TextChoices):
+    CONFIRMED = 'confirmed', 'Confirmed'
+    CANCELLED = 'cancelled', 'Cancelled'
+    DELIVERED = 'delivered', 'Delivered'
+
 class User(AbstractUser):
     first_name = None
     last_name = None
@@ -45,6 +50,7 @@ class Order(models.Model):
     products = models.ManyToManyField(Product,through='OrderItem')
     date_created = models.DateTimeField(auto_now_add=True)
     total_bill = models.DecimalField(max_digits=10,decimal_places=2)
+    status = models.CharField(choices=OrderStatus.choices,default=OrderStatus.CONFIRMED)  
 
     def __str__(self):
         return f"{self.user} - {self.date_created}"
