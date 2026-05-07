@@ -2,13 +2,14 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
+class Role(models.TextChoices):
+    ADMIN = 'admin', 'Admin'
+    CUSTOMER = 'customer', 'Customer'
 
 class User(AbstractUser):
-    # TODO: Move outside model
-    ROLE_CHOICES =(('admin','Admin'),('customer','Customer'))
     first_name = None
     last_name = None
-    role = models.CharField(max_length=20,choices=ROLE_CHOICES,default='customer')
+    role = models.CharField(max_length=20,choices=Role.choices,default=Role.CUSTOMER)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=10,unique=True)
 
