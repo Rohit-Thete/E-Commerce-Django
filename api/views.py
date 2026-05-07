@@ -209,9 +209,9 @@ class OrderView(APIView):
     
 
 @api_view(["PUT"])
-def cancel(self,request,pk):
+def cancel(request,pk):
     user = request.user
-    order = get_object_or_404(Order,id=pk,user=user)
+    order = get_object_or_404(Order,id=pk,user=user.id)
     if order.status == OrderStatus.CANCELLED:
         return Response({"error":"Invalid Request"},status=400)
         
