@@ -1,4 +1,4 @@
-from .views import register,login_user,UserView,CategoryView,ProductView,OrderView, cancel
+from .views import register,login_user,UserView,CategoryView,ProductView,OrderView
 from django.urls import path
 
 urlpatterns = [
@@ -11,6 +11,6 @@ urlpatterns = [
     path('product/<int:pk>/',ProductView.as_view()),
     path('order/',OrderView.as_view()),
     path('order/<int:pk>/',OrderView.as_view()),
-    path('order/cancel/<int:pk>',cancel),
+    path('order/cancel/<int:pk>',OrderView.as_view()),
 
 ]
