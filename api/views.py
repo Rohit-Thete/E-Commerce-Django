@@ -85,12 +85,12 @@ class UserView(APIView):
 
 
 class CategoryView(APIView):
-    # permission_classes=([IsAuthenticated,IsAdmin])
+    permission_classes=([IsAuthenticated,IsadminOrReadOnly])
 
-    def get_permissions(self):
-        if self.request.method in ["POST", "UPDATE", "DELETE"]:
-            return [IsAuthenticated(), IsAdmin()]
-        return [AllowAny()]
+    # def get_permissions(self):
+    #     if self.request.method in ["POST", "UPDATE", "DELETE"]:
+    #         return [IsAuthenticated(), IsAdmin()]
+    #     return [AllowAny()]
 
     def post(self, request):
         serializer = CategorySerializer(data=request.data)
@@ -131,10 +131,11 @@ class CategoryView(APIView):
 
 
 class ProductView(APIView):
-    def get_permissions(self):
-        if self.request.method in ["POST", "UPDATE", "DELETE"]:
-            return [IsAuthenticated(), IsAdmin()]
-        return [AllowAny()]
+    permission_classes=([IsadminOrReadOnly])
+    # def get_permissions(self):
+    #     if self.request.method in ["POST", "UPDATE", "DELETE"]:
+    #         return [IsAuthenticated(), IsAdmin()]
+    #     return [AllowAny()]
 
     def post(self, request):
         serializer = ProductWriteSerializer(data=request.data)
@@ -197,16 +198,17 @@ class OrderView(APIView):
         return Response(serializer.data,status=200)
     
 
-    def delete(self,request,pk):
-        user = request.user
-        order = get_object_or_404(Order,id=pk,user=user)
-        id = order.id
-        order.delete()
+    # def delete(self,request,pk):
+    #     user = request.user
+    #     order = get_object_or_404(Order,id=pk,user=user)
+    #     id = order.id
+    #     order.delete()
 
-        return Response({"msg":f"Order with id '{id}' deleted successfully"})
+    #     return Response({"msg":f"Order with id '{id}' deleted successfully"})
     
 
 @api_view(["PUT"])
+@permission_classes([IsAuthenticated])
 def cancel(request,pk):
     user = request.user
     order = get_object_or_404(Order,id=pk,user=user.id)
