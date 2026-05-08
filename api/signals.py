@@ -1,9 +1,16 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.db import transaction
 from .models import User, Order, OrderStatus
 from .task import send_welcome_email, send_order_confirmation_email, send_order_cancellation_email, send_order_delivered_email
 
+
+
+@receiver(pre_save, sender=User)
+def pre_save_email_validation_signal(sender,instance,**kwargs):
+    if instance.email:
+        instance.email = instance.email.lower().strip()
+    
 
 @receiver(post_save, sender=User)
 def send_welcome_email_signal(sender, instance, created, **kwargs):
