@@ -15,7 +15,7 @@ from .serializers import (
     ProductWriteSerializer,
     ProductReadSerializer,
     OrderCreateSerializer,
-    OrderReadSerializer
+    OrderReadSerializer,
 )
 from .service import create_order
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -66,6 +66,7 @@ def login_user(request):
 
 class UserView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         user = request.user
         data = User.objects.get(username=user.username)
@@ -85,7 +86,7 @@ class UserView(APIView):
 
 
 class CategoryView(APIView):
-    permission_classes=([IsAuthenticated,IsadminOrReadOnly])
+    permission_classes = [IsAuthenticated, IsadminOrReadOnly]
 
     # def get_permissions(self):
     #     if self.request.method in ["POST", "UPDATE", "DELETE"]:
@@ -131,7 +132,7 @@ class CategoryView(APIView):
 
 
 class ProductView(APIView):
-    permission_classes=([IsadminOrReadOnly])
+    permission_classes = [IsadminOrReadOnly]
     # def get_permissions(self):
     #     if self.request.method in ["POST", "UPDATE", "DELETE"]:
     #         return [IsAuthenticated(), IsAdmin()]
@@ -170,44 +171,50 @@ class ProductView(APIView):
         product.delete()
 
         return Response({"msg": f"Product '{name}' deleted succesfully"}, status=200)
-    
 
 
 class OrderView(APIView):
-    permission_classes=([IsAuthenticated])
-    def post(self,request):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
 
         serializer = OrderCreateSerializer(data=request.data)
 
         if serializer.is_valid():
             items = serializer.validated_data["items"]
             with transaction.atomic():
-                order = create_order(request.user,items)
-                send_order_confirmation_email.delay(request.user.username, request.user.email, order.id)
+                order = create_order(request.user, items)
+                send_order_confirmation_email.delay(
+                    request.user.username, request.user.email, order.id
+                )
 
-                return Response({"msg":"order created","orderid":order.id},status=201)
-        
-        return Response(serializer.errors,status=400)
-    
+                return Response(
+                    {"msg": "order created", "orderid": order.id}, status=201
+                )
 
-    def get(self,request):
+        return Response(serializer.errors, status=400)
+
+    def get(self, request):
         user = request.user
-        orders = Order.objects.filter(user = user).prefetch_related(Prefetch("items", queryset=OrderItem.objects.select_related("product")))
-        serializer = OrderReadSerializer(orders,many=True)
+        orders = Order.objects.filter(user=user).prefetch_related(
+            Prefetch("items", queryset=OrderItem.objects.select_related("product"))
+        )
+        serializer = OrderReadSerializer(orders, many=True)
 
-        return Response(serializer.data,status=200)
-    
-    def put(self,request,pk):
+        return Response(serializer.data, status=200)
+
+    def put(self, request, pk):
         user = request.user
-        order = get_object_or_404(Order,id=pk,user=user.id)
+        order = get_object_or_404(Order, id=pk, user=user.id)
         if order.status == OrderStatus.CANCELLED:
-            return Response({"error":"Invalid Request"},status=400)
-            
+            return Response({"error": "Invalid Request"}, status=400)
+
         order.status = OrderStatus.CANCELLED
         order.save(update_fields=["status"])
 
-        return Response({"msg":f"order with order id {order.id} Cancelled succesfully"})
-    
+        return Response(
+            {"msg": f"order with order id {order.id} Cancelled succesfully"}
+        )
 
     # def delete(self,request,pk):
     #     user = request.user
@@ -216,9 +223,3 @@ class OrderView(APIView):
     #     order.delete()
 
     #     return Response({"msg":f"Order with id '{id}' deleted successfully"})
-    
-
- 
-
-
-
