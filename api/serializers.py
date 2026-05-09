@@ -151,16 +151,14 @@ class ProductReadSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-
 class OrderItemInputSerializer(serializers.Serializer):
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all()
-    )
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
     quantity = serializers.IntegerField(min_value=1)
 
 
 class OrderCreateSerializer(serializers.Serializer):
     items = OrderItemInputSerializer(many=True)
+
 
 class OrderItemReadSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
@@ -169,19 +167,10 @@ class OrderItemReadSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = ["product", "product_name", "quantity", "price", "item_subtotal"]
 
+
 class OrderReadSerializer(serializers.ModelSerializer):
-    items = OrderItemReadSerializer(many= True,read_only = True)
+    items = OrderItemReadSerializer(many=True, read_only=True)
+
     class Meta:
         model = Order
-        fields = ["id","total_bill","items","date_created"]
-        
-
-
-
-
-
-        
-
-
-        
-
+        fields = ["id", "total_bill", "items", "date_created"]

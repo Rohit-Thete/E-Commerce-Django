@@ -3,6 +3,7 @@ import resend
 from celery import shared_task
 from django.conf import settings
 
+
 @shared_task
 def send_welcome_email(username, email):
 
@@ -14,6 +15,7 @@ def send_welcome_email(username, email):
         fail_silently=False,
     )
 
+
 @shared_task
 def send_order_confirmation_email(username, email, orderid):
     send_mail(
@@ -23,9 +25,6 @@ def send_order_confirmation_email(username, email, orderid):
         recipient_list=[email],
         fail_silently=False,
     )
-
-
-
 
 
 # @shared_task
