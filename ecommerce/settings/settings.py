@@ -44,8 +44,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "api",
-    "silk",
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ["silk"]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -55,8 +57,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "silk.middleware.SilkyMiddleware",
 ]
+
+if DEBUG:
+    MIDDLEWARE = ["silk.middleware.SilkyMiddleware"] + MIDDLEWARE
 
 ROOT_URLCONF = "ecommerce.urls"
 
