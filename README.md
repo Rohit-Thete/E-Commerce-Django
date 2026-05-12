@@ -80,7 +80,7 @@ EMAIL_HOST_USER=your-email@example.com
 EMAIL_HOST_PASSWORD=your-email-password
 ```
 
-Do not commit real secrets or email credentials to version control.
+Do not commit real secrets or email credentials to version control
 
 ## Installation
 
