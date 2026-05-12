@@ -35,18 +35,20 @@ A backend e-commerce API built with Django, Django REST Framework, JWT authentic
 ```text
 .
 +-- api/
-|   +-- admin.py          # Django admin registrations
-|   +-- models.py         # User, Category, Product, Order, and OrderItem models
-|   +-- permissions.py    # Custom role-based permissions
-|   +-- serializers.py    # Request and response serializers
-|   +-- service.py        # Order creation business logic
-|   +-- task.py           # Celery email tasks
-|   +-- urls.py           # API route definitions
-|   +-- views.py          # API views
+|   +-- admin.py            # Django admin registrations
+|   +-- models.py           # User, Category, Product, Order, and OrderItem models
+|   +-- permissions.py      # Custom role-based permissions
+|   +-- serializers.py      # Request and response serializers
+|   +-- service.py          # Order creation business logic
+|   +-- task.py             # Celery email tasks
+|   +-- urls.py             # API route definitions
+|   +-- views.py            # API views
 +-- ecommerce/
-|   +-- celery.py         # Celery application configuration
-|   +-- settings.py       # Django settings
-|   +-- urls.py           # Project URL configuration
+|   +-- celery.py           # Celery application configuration
+|   +-- settings/
+        +-- settings.py
+        +-- production.py   # Django settings
+|   +-- urls.py             # Project URL configuration
 |   +-- asgi.py
 |   +-- wsgi.py
 +-- manage.py
@@ -79,8 +81,11 @@ EMAIL_PORT=587
 EMAIL_HOST_USER=your-email@example.com
 EMAIL_HOST_PASSWORD=your-email-password
 ```
-
-Do not commit real secrets or email credentials to version control.
+## Settings for Production
+to use Production settings use folloeing command in terminal
+```bash
+python manage.py runserver --settings=ecommerce.settings.production
+```
 
 ## Installation
 
