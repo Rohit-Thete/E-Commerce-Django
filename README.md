@@ -46,8 +46,9 @@ A backend e-commerce API built with Django, Django REST Framework, JWT authentic
 +-- ecommerce/
 |   +-- celery.py           # Celery application configuration
 |   +-- settings/
-        +-- settings.py
-        +-- production.py   # Django settings
+        +-- settings.py     # Base settings
+        +-- dev.py          # Development settings
+        +-- production.py   # Production settings
 |   +-- urls.py             # Project URL configuration
 |   +-- asgi.py
 |   +-- wsgi.py
@@ -92,7 +93,7 @@ python manage.py runserver --settings=ecommerce.settings.production
 Clone the repository and install dependencies:
 
 ```bash
-uv sync
+uv sync --no-dev --group prod
 ```
 
 If the lockfile is out of date after dependency changes, refresh it first:
