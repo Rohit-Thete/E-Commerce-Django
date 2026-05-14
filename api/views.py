@@ -63,6 +63,23 @@ def login_user(request):
 
     return Response(serializer.errors, status=400)
 
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def get_all_users(request):
+    users = User.users.all()
+    serializer = UserReadSerializer(users, many=True)
+
+    return Response(serializer.data, status=200)
+
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def get_delivered_orders(request):
+    delivered = Order.delivered.all()
+    serializer = OrderReadSerializer(delivered,many=True)
+
+    return Response(serializer.data,status=200)
+
+
 
 class UserView(APIView):
     permission_classes = [IsAuthenticated]
@@ -83,6 +100,13 @@ class UserView(APIView):
             return Response(serializer.data, status=200)
 
         return Response(serializer.errors, status=400)
+    
+    def delete(self, request):
+        user = request.user
+        user.is_deleted = True
+        user.save(update_fields=["is_deleted"])
+
+        return Response({"msg": "User deleted successfully"}, status=200)
 
 
 class CategoryView(APIView):

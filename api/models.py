@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from api.managers import CustomUserManager
+from .managers import CustomUserManager, CustomOrderManager
+
 
 # Create your models here.
 class Role(models.TextChoices):
@@ -20,6 +23,11 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.CUSTOMER)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=10, unique=True)
+    is_deleted = models.BooleanField(default=False)
+
+    objects = models.Manager()
+    users = CustomUserManager()
+
 
     REQUIRED_FIELDS = ["email", "phone"]
 
@@ -55,6 +63,9 @@ class Order(models.Model):
     status = models.CharField(
         choices=OrderStatus.choices, default=OrderStatus.CONFIRMED
     )
+
+    objects = models.Manager()
+    delivered = CustomOrderManager()
 
     def __str__(self):
         return f"{self.user} - {self.date_created}"

@@ -1,9 +1,11 @@
-from .views import register, login_user, UserView, CategoryView, ProductView, OrderView
+from .views import register, login_user, UserView, CategoryView, ProductView, OrderView, get_all_users, get_delivered_orders
 from django.urls import path
 
 urlpatterns = [
     path("register/", register),
     path("login/", login_user),
+    path("users/", get_all_users),
+    path("orders/",get_delivered_orders),
     path("user/", UserView.as_view()),
     path("category/", CategoryView.as_view()),
     path("category/<int:pk>/", CategoryView.as_view()),
