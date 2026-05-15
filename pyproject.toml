@@ -8,8 +8,10 @@ dependencies = [
     "black>=26.3.1",
     "celery>=5.6.3",
     "django>=6.0.5",
+    "django-jazzmin>=3.0.4",
     "djangorestframework>=3.17.1",
     "djangorestframework-simplejwt>=5.5.1",
+    "psycopg[binary]>=3.3.4",
     "python-dotenv>=1.1.0",
     "redis>=7.4.0",
     "resend>=2.12.0",
@@ -17,7 +19,6 @@ dependencies = [
 
 [dependency-groups]
 development = [
-    "django-jazzmin>=3.0.4",
     "django-silk>=5.5.0",
     "django-unfold>=0.93.0",
 ]

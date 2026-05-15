@@ -2,17 +2,17 @@ from .settings import *
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-INSTALLED_APPS += [
-    "silk", 
-]
-MIDDLEWARE += ["silk.middleware.SilkyMiddleware"] 
+# INSTALLED_APPS += [
+#     "silk",
+# ]
+# MIDDLEWARE += ["silk.middleware.SilkyMiddleware"]
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 
 CELERY_BROKER_URL = "redis://localhost:6379/0"
