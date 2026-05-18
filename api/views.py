@@ -2,9 +2,12 @@ from django.shortcuts import render
 from django.db.models import Prefetch
 from .models import User, Category, Product, Order, OrderItem, OrderStatus
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from .task import send_welcome_email, send_order_confirmation_email
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 from rest_framework.decorators import api_view, permission_classes, action
 from .serializers import (
     RegisterSerializer,
@@ -18,6 +21,7 @@ from .serializers import (
     OrderReadSerializer,
 )
 from .service import create_order
+from .filters import OrderFilter, ProductFilter
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from .permissions import *
 from django.db import transaction
@@ -132,10 +136,18 @@ class CategoryView(APIView):
 
 class ProductView(APIView):
     permission_classes = [IsadminOrReadOnly]
+    filterset_class = ProductFilter
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ["name", "category__name", "stock","available"]
     # def get_permissions(self):
     #     if self.request.method in ["POST", "UPDATE", "DELETE"]:
     #         return [IsAuthenticated(), IsAdmin()]
     #     return [AllowAny()]
+
+    def filter_queryset(self, queryset):
+        for backend in self.filter_backends:
+            queryset = backend().filter_queryset(self.request, queryset, self)
+        return queryset
 
     def post(self, request):
         serializer = ProductWriteSerializer(data=request.data)
@@ -149,6 +161,9 @@ class ProductView(APIView):
 
     def get(self, request):
         products = Product.objects.select_related("category")
+        print("before filter", products.count())
+        products = self.filter_queryset(products)
+        print("before filter", products.count())
         serializer = ProductReadSerializer(products, many=True)
 
         return Response(serializer.data, status=200)
@@ -172,33 +187,87 @@ class ProductView(APIView):
         return Response({"msg": f"Product '{name}' deleted succesfully"}, status=200)
 
 
-class OrderView(APIView):
+# class ProductViewSet(ModelViewSet):
+#     permission_classes = [IsadminOrReadOnly]
+#     filterset_class = ProductFilter
+#     queryset = Product.objects.select_related("category")
+#     search_fields = ["name", "category__name", "stock"]
+
+#     def get_serializer_class(self, *args, **kwargs):
+#         if self.action in ["create", "update"]:
+#             return ProductWriteSerializer
+#         return ProductReadSerializer
+
+
+# class OrderView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def post(self, request):
+
+#         serializer = OrderCreateSerializer(data=request.data)
+
+#         if serializer.is_valid():
+#             items = serializer.validated_data["items"]
+#             with transaction.atomic():
+#                 order = create_order(request.user, items)
+#                 # send_order_confirmation_email.delay(request.user.username, request.user.email, order.id)
+#                 return Response(
+#                     {"msg": "order created", "orderid": order.id}, status=201
+#                 )
+
+#         return Response(serializer.errors, status=400)
+
+#     def get(self, request):
+#         user = request.user
+#         orders = Order.objects.filter(user=user).prefetch_related(
+#             Prefetch("items", queryset=OrderItem.objects.select_related("product"))
+#         )
+#         serializer = OrderReadSerializer(orders, many=True)
+
+#         return Response(serializer.data, status=200)
+
+#     def put(self, request, pk):
+#         user = request.user
+#         order = get_object_or_404(Order, id=pk, user=user.id)
+#         if order.status == OrderStatus.CANCELLED:
+#             return Response({"error": "Invalid Request"}, status=400)
+
+#         order.status = OrderStatus.CANCELLED
+#         order.save(update_fields=["status"])
+
+#         return Response(
+#             {"msg": f"order with order id {order.id} Cancelled succesfully"}
+#         )
+
+
+class OrderViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
+    Http_method_names = ["get", "post", "put"]
+    filterset_class = OrderFilter
 
-    def post(self, request):
+    def get_serializer_class(self):
+        if self.action == "create":
+            return OrderCreateSerializer
+        return OrderReadSerializer
 
-        serializer = OrderCreateSerializer(data=request.data)
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user).prefetch_related(
+            Prefetch("items", queryset=OrderItem.objects.select_related("product"))
+        )
 
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             items = serializer.validated_data["items"]
             with transaction.atomic():
-                order = create_order(request.user,items)
-                # send_order_confirmation_email.delay(request.user.username, request.user.email, order.id)
-                return Response({"msg":"order created","orderid":order.id},status=201)
-        
-        return Response(serializer.errors,status=400)
-    
+                order = create_order(request.user, items)
+                return Response(
+                    {"msg": "order created", "orderid": order.id}, status=201
+                )
 
-    def get(self, request):
-        user = request.user
-        orders = Order.objects.filter(user=user).prefetch_related(
-            Prefetch("items", queryset=OrderItem.objects.select_related("product"))
-        )
-        serializer = OrderReadSerializer(orders, many=True)
+        return Response(serializer.errors, status=400)
 
-        return Response(serializer.data, status=200)
-
-    def put(self, request, pk):
+    def update(self, request, pk):
         user = request.user
         order = get_object_or_404(Order, id=pk, user=user.id)
         if order.status == OrderStatus.CANCELLED:

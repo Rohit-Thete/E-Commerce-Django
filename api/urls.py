@@ -1,5 +1,12 @@
-from .views import register, login_user, UserView, CategoryView, ProductView, OrderView
-from django.urls import path
+from .views import register, login_user, UserView, CategoryView, OrderViewSet, ProductView
+from django.urls import path, include
+
+
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register('orders', OrderViewSet,basename='orders')
+# router.register('products', ProductViewSet,basename='products')
 
 urlpatterns = [
     path("register/", register),
@@ -9,7 +16,8 @@ urlpatterns = [
     path("category/<int:pk>/", CategoryView.as_view()),
     path("product/", ProductView.as_view()),
     path("product/<int:pk>/", ProductView.as_view()),
-    path("order/", OrderView.as_view()),
-    path("order/<int:pk>/", OrderView.as_view()),
-    path("order/cancel/<int:pk>", OrderView.as_view()),
+    path("", include(router.urls)),
+    # path("order/", OrderView.as_view()),
+    # path("order/<int:pk>/", OrderView.as_view()),
+    # path("order/cancel/<int:pk>", OrderView.as_view()),
 ]
