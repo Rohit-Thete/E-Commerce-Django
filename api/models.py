@@ -1,5 +1,14 @@
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+
+
+class AbstractBaseModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
 
 
 # Create your models here.
@@ -14,7 +23,7 @@ class OrderStatus(models.TextChoices):
     DELIVERED = "delivered", "Delivered"
 
 
-class User(AbstractUser):
+class User(AbstractUser, AbstractBaseModel):
     first_name = None
     last_name = None
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.CUSTOMER)
@@ -30,37 +39,37 @@ class User(AbstractUser):
         return f"{self.username} - {self.email}"
 
 
-class Category(models.Model):
+class Category(AbstractBaseModel):
     name = models.CharField(max_length=20, unique=True)
 
     def __str__(self):
         return self.name
 
 
-class Product(models.Model):
+class Product(AbstractBaseModel):
     name = models.CharField(max_length=20)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     stock = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    image = models.ImageField(upload_to="product_images/", blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} - {self.category} - {self.stock} - {self.price}"
 
 
-class Order(models.Model):
+class Order(AbstractBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     products = models.ManyToManyField(Product, through="OrderItem")
-    date_created = models.DateTimeField(auto_now_add=True)
     total_bill = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
         choices=OrderStatus.choices, default=OrderStatus.CONFIRMED
     )
 
     def __str__(self):
-        return f"{self.user} - {self.date_created}"
+        return f"{self.user} - {self.created_at} - {self.status} - {self.total_bill}"
 
 
-class OrderItem(models.Model):
+class OrderItem(AbstractBaseModel):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
