@@ -4,6 +4,7 @@ from .models import User, Category, Product, Order, OrderItem, OrderStatus
 from rest_framework.views import APIView
 from .task import send_welcome_email, send_order_confirmation_email
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes, action
 from .serializers import (
@@ -84,50 +85,52 @@ class UserView(APIView):
         return Response(serializer.errors, status=400)
 
 
-class CategoryView(APIView):
+class CategoryView(ModelViewSet):
     permission_classes = [IsAuthenticated, IsadminOrReadOnly]
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
     # def get_permissions(self):
     #     if self.request.method in ["POST", "UPDATE", "DELETE"]:
     #         return [IsAuthenticated(), IsAdmin()]
     #     return [AllowAny()]
 
-    def post(self, request):
-        serializer = CategorySerializer(data=request.data)
+    # def post(self, request):
+    #     serializer = CategorySerializer(data=request.data)
 
-        if serializer.is_valid():
-            obj = serializer.save()
-            return Response(
-                {"msg": "Category Added Successfully", "category": obj.name}, status=201
-            )
+    #     if serializer.is_valid():
+    #         obj = serializer.save()
+    #         return Response(
+    #             {"msg": "Category Added Successfully", "category": obj.name}, status=201
+    #         )
 
-        return Response(serializer.errors, status=400)
+    #     return Response(serializer.errors, status=400)
 
-    def get(self, request):
-        categories = Category.objects.all()
-        serializer = CategorySerializer(categories, many=True)
+    # def get(self, request):
+    #     categories = Category.objects.all()
+    #     serializer = CategorySerializer(categories, many=True)
 
-        return Response(serializer.data, status=200)
+    #     return Response(serializer.data, status=200)
 
-    def put(self, request, pk):
-        catogory = Category.objects.get(id=pk)
-        serializer = CategorySerializer(catogory, data=request.data)
+    # def put(self, request, pk):
+    #     catogory = Category.objects.get(id=pk)
+    #     serializer = CategorySerializer(catogory, data=request.data)
 
-        if serializer.is_valid():
-            obj = serializer.save()
-            return Response(
-                {"msg": "Category Updated Succeessfully", "category": obj.name},
-                status=200,
-            )
+    #     if serializer.is_valid():
+    #         obj = serializer.save()
+    #         return Response(
+    #             {"msg": "Category Updated Succeessfully", "category": obj.name},
+    #             status=200,
+    #         )
 
-        return Response(serializer.errors, status=400)
+    #     return Response(serializer.errors, status=400)
 
-    def delete(self, request, pk):
-        category = get_object_or_404(Category, id=pk)
+    # def delete(self, request, pk):
+    #     category = get_object_or_404(Category, id=pk)
 
-        name = category.name
-        category.delete()
-        return Response({"msg": f"Category '{name}' deleted successfully"}, status=200)
+    #     name = category.name
+    #     category.delete()
+    #     return Response({"msg": f"Category '{name}' deleted successfully"}, status=200)
 
 
 class ProductView(APIView):
