@@ -132,7 +132,7 @@ http://127.0.0.1:8000/api/
 Start Redis locally, then run the Celery worker:
 
 ```bash
-celery -A ecommerce worker --pool=solo --loglevel=info  
+  celery -A ecommerce worker --pool=solo --loglevel=info  
 ```
 
 Celery is configured to use Redis at:

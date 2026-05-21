@@ -1,4 +1,4 @@
-from .models import User, Product, Category, Order, OrderItem
+from .models import Brand, User, Product, Category, Order, OrderItem
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
@@ -43,6 +43,7 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("User is In-Active")
 
         refresh = RefreshToken.for_user(user)
+        print(refresh.payload)
 
         return {
             "user": user,
@@ -50,6 +51,18 @@ class LoginSerializer(serializers.Serializer):
             "refresh": str(refresh),
         }
 
+class BrandSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        validators=[
+            UniqueValidator(
+                queryset=Brand.objects.all(), message="This Brand already exists"
+            )
+        ]
+    )
+
+    class Meta:
+        model = Brand
+        fields = "__all__"
 
 class UserReadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -145,6 +158,7 @@ class ProductWriteSerializer(serializers.ModelSerializer):
 
 class ProductReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
+    brand = BrandSerializer()
 
     class Meta:
         model = Product
