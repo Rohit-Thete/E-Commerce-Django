@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Brand, User, Category, Product, Order, OrderItem
+from mptt.admin import DraggableMPTTAdmin, MPTTModelAdmin
 
 
 # Register your models here.
@@ -9,9 +10,16 @@ class UserAdmin(admin.ModelAdmin):
 
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    
-    list_display = ["id", "name", "created_at", "is_active"]
+class CategoryAdmin(DraggableMPTTAdmin):
+
+    mptt_indent_field = "name"
+    mptt_level_indent = 30
+
+    list_display = ("indented_title",
+                    "tree_actions")
+    search_fields = ["name"]
+
+    list_display_links = ("indented_title",)
 
 
 @admin.register(Brand)

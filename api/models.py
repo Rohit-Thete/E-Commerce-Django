@@ -1,7 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
-
+from mptt.models import (
+    MPTTModel,
+    TreeForeignKey
+)
 
 class AbstractBaseModel(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
@@ -50,15 +53,20 @@ class User(AbstractUser, AbstractBaseModel):
         return f"{self.username} - {self.email}"
 
 
-class Category(AbstractBaseModel):
+class Category(MPTTModel,AbstractBaseModel):
     name = models.CharField(max_length=255, unique=True)
-    parent = models.ForeignKey(
+    parent = TreeForeignKey(
         "self",
         on_delete=models.PROTECT,
         related_name="sub_categories",
         blank=True,
         null=True,
+       
     )
+
+    class MPTTMeta:
+
+        order_insertion_by = ["name"]
 
     class Meta:
         ordering=["name"]
