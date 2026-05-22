@@ -156,13 +156,20 @@ class ProductWriteSerializer(serializers.ModelSerializer):
     #     return product
 
 
-class ProductReadSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-    brand = BrandSerializer()
+# class ProductReadSerializer(serializers.ModelSerializer):
+#     category = CategorySerializer()
+#     brand = BrandSerializer()
 
+#     class Meta:
+#         model = Product
+#         fields = "__all__"
+
+class ProductListSerializer(serializers.ModelSerializer):
+    brand = serializers.CharField(source="brand.name")
+    category = serializers.CharField(source="category.name")
     class Meta:
         model = Product
-        fields = "__all__"
+        fields = ["id","category","brand", "name", "price", "stock"]
 
 
 class OrderItemInputSerializer(serializers.Serializer):

@@ -8,13 +8,13 @@ from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes, action
 from .serializers import (
+    ProductListSerializer,
     RegisterSerializer,
     LoginSerializer,
     UserReadSerializer,
     UserUpdateSerializer,
     CategorySerializer,
     ProductWriteSerializer,
-    ProductReadSerializer,
     OrderCreateSerializer,
     OrderReadSerializer,
 )
@@ -133,47 +133,55 @@ class CategoryView(ModelViewSet):
     #     return Response({"msg": f"Category '{name}' deleted successfully"}, status=200)
 
 
-class ProductView(APIView):
+# class ProductView(APIView):
+#     permission_classes = [IsadminOrReadOnly]
+#     # def get_permissions(self):
+#     #     if self.request.method in ["POST", "UPDATE", "DELETE"]:
+#     #         return [IsAuthenticated(), IsAdmin()]
+#     #     return [AllowAny()]
+
+#     def post(self, request):
+#         serializer = ProductWriteSerializer(data=request.data)
+#         if serializer.is_valid():
+#             obj = serializer.save()
+#             return Response(
+#                 {"msg": f"product '{obj.name}' saved successfully"}, status=201
+#             )
+
+#         return Response(serializer.errors, status=400)
+
+#     def get(self, request):
+#         products = Product.objects.select_related("category")
+#         serializer = ProductReadSerializer(products, many=True)
+
+#         return Response(serializer.data, status=200)
+
+#     def put(self, request, pk):
+#         product = Product.objects.get(id=pk)
+#         serializer = ProductWriteSerializer(product, data=request.data, partial=True)
+#         if serializer.is_valid():
+#             obj = serializer.save()
+#             return Response(
+#                 {"msg": f"Product '{obj.name}' updated successfully"}, status=200
+#             )
+
+#         return Response(serializer.errors, status=400)
+
+#     def delete(self, request, pk):
+#         product = get_object_or_404(Product, id=pk)
+#         name = product.name
+#         product.delete()
+
+#         return Response({"msg": f"Product '{name}' deleted succesfully"}, status=200)
+
+class ProductViewSet(ModelViewSet):
     permission_classes = [IsadminOrReadOnly]
-    # def get_permissions(self):
-    #     if self.request.method in ["POST", "UPDATE", "DELETE"]:
-    #         return [IsAuthenticated(), IsAdmin()]
-    #     return [AllowAny()]
+    queryset = Product.objects.select_related("category", "brand").all()
 
-    def post(self, request):
-        serializer = ProductWriteSerializer(data=request.data)
-        if serializer.is_valid():
-            obj = serializer.save()
-            return Response(
-                {"msg": f"product '{obj.name}' saved successfully"}, status=201
-            )
-
-        return Response(serializer.errors, status=400)
-
-    def get(self, request):
-        products = Product.objects.select_related("category")
-        serializer = ProductReadSerializer(products, many=True)
-
-        return Response(serializer.data, status=200)
-
-    def put(self, request, pk):
-        product = Product.objects.get(id=pk)
-        serializer = ProductWriteSerializer(product, data=request.data, partial=True)
-        if serializer.is_valid():
-            obj = serializer.save()
-            return Response(
-                {"msg": f"Product '{obj.name}' updated successfully"}, status=200
-            )
-
-        return Response(serializer.errors, status=400)
-
-    def delete(self, request, pk):
-        product = get_object_or_404(Product, id=pk)
-        name = product.name
-        product.delete()
-
-        return Response({"msg": f"Product '{name}' deleted succesfully"}, status=200)
-
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return ProductWriteSerializer
+        return ProductListSerializer
 
 class OrderView(APIView):
     permission_classes = [IsAuthenticated]
