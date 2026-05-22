@@ -161,6 +161,4 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
-
-
 # RESEND_API_KEY = os.getenv("RESEND_API_KEY")

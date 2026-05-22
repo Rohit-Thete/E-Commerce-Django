@@ -30,7 +30,7 @@ class ProductAdmin(admin.ModelAdmin):
         "stock",
         "created_at",
         "is_active",
-        "image",
+        "image_url",
     ]
 
 
