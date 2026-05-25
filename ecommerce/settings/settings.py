@@ -39,7 +39,7 @@ AUTH_USER_MODEL = "api.User"
 
 INSTALLED_APPS = [
     # "unfold",
-    "jazzmin",
+    # "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "api",
+    "mptt",
 ]
 
 MIDDLEWARE = [
@@ -100,9 +101,9 @@ DATABASES = {
     }
 }
 
-MEDIA_URL = '/media/'
+MEDIA_URL = "/media/"
 
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / "media"
 
 
 # Password validation
