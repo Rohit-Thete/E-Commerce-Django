@@ -1,6 +1,15 @@
 from django.shortcuts import render
 from django.db.models import Prefetch
-from .models import User, Category, Product, Order, OrderItem, OrderStatus
+from .models import (
+    User,
+    Category,
+    Product,
+    Order,
+    OrderItem,
+    OrderStatus,
+    Cart,
+    CartItem,
+)
 from rest_framework.views import APIView
 from .task import send_welcome_email, send_order_confirmation_email
 from rest_framework.response import Response
@@ -17,8 +26,11 @@ from .serializers import (
     ProductWriteSerializer,
     OrderCreateSerializer,
     OrderReadSerializer,
+    CartCreateSerializer,
+    CartReadSerializer,
+    CartItemUpdateSerializer,
 )
-from .service import create_order
+from .service import create_order, create_cart, checkout_cart, update_cart_item
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from .permissions import *
 from django.db import transaction
@@ -174,6 +186,7 @@ class CategoryView(ModelViewSet):
 
 #         return Response({"msg": f"Product '{name}' deleted succesfully"}, status=200)
 
+
 class ProductViewSet(ModelViewSet):
     permission_classes = [IsadminOrReadOnly]
     queryset = Product.objects.select_related("category", "brand").all()
@@ -182,6 +195,7 @@ class ProductViewSet(ModelViewSet):
         if self.action in ["create", "update", "partial_update"]:
             return ProductWriteSerializer
         return ProductListSerializer
+
 
 class OrderView(APIView):
     permission_classes = [IsAuthenticated]
@@ -230,3 +244,45 @@ class OrderView(APIView):
     #     order.delete()
 
     #     return Response({"msg":f"Order with id '{id}' deleted successfully"})
+
+
+class CartView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = CartCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            items = serializer.validated_data["items"]
+            with transaction.atomic():
+                cart = create_cart(request.user, items)
+                return Response({"msg": "cart created", "cartid": cart.id}, status=201)
+        return Response(serializer.errors, status=400)
+
+    def get(self, request):
+        user = request.user
+        cart = Cart.objects.filter(user=user).prefetch_related(
+            Prefetch("items", queryset=CartItem.objects.select_related("product"))
+        )
+        serializer = CartReadSerializer(cart,many=True)
+
+        return Response(serializer.data, status=200)
+
+    def patch(self, request, pk):
+        serializer = CartItemUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            quantity = serializer.validated_data["quantity"]
+            cart_item = update_cart_item(request.user, quantity, pk)
+            serializer = CartReadSerializer(cart_item)
+            return Response(serializer.data, status=200)
+
+        return Response(serializer.errors, status=400)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def checkout(request):
+    user = request.user
+    order = checkout_cart(user)
+    serializer = OrderReadSerializer(order)
+
+    return Response(serializer.data, status=201)

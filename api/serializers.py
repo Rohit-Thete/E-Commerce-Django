@@ -1,4 +1,4 @@
-from .models import Brand, User, Product, Category, Order, OrderItem
+from .models import Brand, Cart, User, Product, Category, Order, OrderItem, CartItem 
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
@@ -169,7 +169,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source="category.name")
     class Meta:
         model = Product
-        fields = ["id","category","brand", "name", "price", "stock"]
+        fields = ["id", "category", "brand", "name", "price", "stock", "image_url"]
 
 
 class OrderItemInputSerializer(serializers.Serializer):
@@ -195,3 +195,34 @@ class OrderReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ["id", "total_bill", "items", "created_at", "status"]
+
+
+
+class CartItemInputSerializer(serializers.Serializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    quantity = serializers.IntegerField(min_value=1)
+
+
+class CartCreateSerializer(serializers.Serializer):
+    items = CartItemInputSerializer(many=True)
+
+
+class CartItemReadSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+    product_price = serializers.DecimalField(source="product.price", max_digits=10, decimal_places=2, read_only=True)
+
+    class Meta:
+        model = CartItem
+        fields = ["product", "product_name", "quantity","product_price"]
+
+
+class CartReadSerializer(serializers.ModelSerializer):
+    items = CartItemReadSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Cart
+        fields = ["id", "cart_total", "items", "created_at"]
+
+
+class CartItemUpdateSerializer(serializers.Serializer):
+    quantity = serializers.IntegerField()

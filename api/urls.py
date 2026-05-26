@@ -1,10 +1,12 @@
 from .views import (
+    CartView,
     register,
     login_user,
     UserView,
     CategoryView,
     OrderView,
     ProductViewSet,
+    checkout
 )
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
@@ -25,4 +27,7 @@ urlpatterns = [
     path("order/", OrderView.as_view()),
     path("order/<int:pk>/", OrderView.as_view()),
     path("order/cancel/<int:pk>", OrderView.as_view()),
+    path("cart/", CartView.as_view()),
+    path("cart/<uuid:pk>/", CartView.as_view()),
+    path("cart/checkout",checkout)
 ]

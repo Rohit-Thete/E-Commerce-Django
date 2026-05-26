@@ -123,3 +123,30 @@ class OrderItem(AbstractBaseModel):
 
     def __str__(self):
         return f"{self.order} - {self.product} - {self.quantity} - {self.price}"
+
+
+class Cart(AbstractBaseModel):
+    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="cart")
+    products = models.ManyToManyField(Product, through="CartItem")
+    cart_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.user} - {self.created_at}"
+
+
+class CartItem(AbstractBaseModel):
+    cart = models.ForeignKey(Cart, on_delete=models.PROTECT, related_name="items")
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ["created_at"]
+        unique_together = ("cart", "product")
+
+    def __str__(self):
+        return f"{self.cart} - {self.product} - {self.quantity}"
